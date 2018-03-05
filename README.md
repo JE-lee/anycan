@@ -1,6 +1,7 @@
 # anydoor
 
-Tiny NodeJS Static Web server
+轻量的node.js 静态资源服务器
+带路由转发功能
 
 ## 安装
 
