@@ -1,2 +1,5 @@
 {
+  "mocha.requires": [
+    "./mocha.env.js"
+  ]
 }

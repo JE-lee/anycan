@@ -17,20 +17,22 @@ function _generateReg(path) {
  * @param {string} url
  */
 function _findRoute(url) {
-  return routes.find(item => item.from.test(url))
+  return routes.find(item => _generateReg(item.from).test(url))
 }
 
 function _getRedirectUrl(url, route) {
   let redirectUrl = route.to
-  let fgroup = url.match(_generateReg(route.from))
+  let u = url.replace(/\?.*/, '')
+  let query = url.substring(u.length)
+  let fgroup = url.match(_generateReg(u))
   let isTo = /\(\d+\)/.test(route.to)
   // TODO: query params处理是否不智能
-  isTo && redirectUrl.replace(/\(\d+\)/g, (match) => fgroup[match] || '')
-  return redirectUrl
+  isTo && (redirectUrl = redirectUrl.replace(/\(\d+\)/g, (match) => fgroup[match] || ''))
+  return redirectUrl + query
 }
 
 // TODO: 下个版本使用stream来转发
-module.exports = async function (url, req, res) {
+async function redirect(url, req, res) {
   let route = _findRoute(url)
   if (route) {
     // 转发路由
@@ -40,7 +42,6 @@ module.exports = async function (url, req, res) {
       method: req.method,
       headers: Object.assign({}, req.headers, route.headers),
       transformRequest: [data => data] // 转发data
-
     }).catch(err => {
       // TODO: 这里属于系统发送请求失败，应该提示管理员
       console.error(err)
@@ -68,3 +69,7 @@ try {
 } catch (error) {
   console.info('no redirect.json', error)
 }
+
+const isTest = process.env.MOCHA_ENV
+module.exports = isTest ? { _getRedirectUrl, _findRoute } : redirect
+

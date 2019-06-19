@@ -22,7 +22,7 @@ const mimeTypes = {
     'xml': 'text/xml'
   };
 
-  module.exports = function mimeTyoe(filepath){
+  module.exports = function mimeType(filepath){
     const ext = path.extname(filepath).split('.').pop()
     return mimeTypes[ext] || mimeTypes['txt']
   }
