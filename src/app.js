@@ -5,26 +5,23 @@ const path = require('path')
 const route = require('./helper/route')
 const redirect = require('./helper/redirect')
 
-const server  =  http.createServer((req , res)=>{
-    //查看是否需要转发
-    //state1:只做路径的判断
-    let url = req.url
-    const redir = redirect(url,req,res)
-    redir.then((response)=>{
-        if(response !== true){
-            //req.url会得到除了host和端口后面的路径。
-            //如果是根目录，就返回/index.html
-            if(url === '/'){
-                url = '/index.html'
-            }
-            const filepath = path.join(config.root,url)
-            route(req,res,filepath)
-        }
-    })
-       
+const server = http.createServer((req, res) => {
+  // 查看是否需要转发
+  // 判断路径是否需要转发
+  // TODO: 这里最好是做成和express一样的插件形式
+  let url = req.url
+  redirect(url, req, res).then(() => {
+    //req.url会得到除了host和端口后面的路径。
+    //如果是根目录，就返回/index.html
+    if (url === '/') {
+      url = '/index.html'
+    }
+    return route(req, res, path.join(config.root, url))
+  })
+
 })
 
-server.listen(config.port,config.host,()=>{
-    const addr = `${config.host}:${config.port}` 
-    console.info(`The server start at ${chalk.green(addr)} !!!`)
+server.listen(config.port, config.host, () => {
+  const addr = `${config.host}:${config.port}`
+  console.info(`The server start at ${chalk.green(addr)} !!!`)
 })

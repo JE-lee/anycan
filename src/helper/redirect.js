@@ -2,106 +2,69 @@ const fs = require('fs')
 const path = require('path')
 const config = require('../config/defaultConfig')
 const axios = require('axios')
-let routes = null
+let routes = []
 /**
- * 
- * @param {string} path 
+ *
+ * @param {string} path
  * @return 返回一个RegExp对象
  */
-function _normalizeText(path){
-    return path.indexOf('(') === -1 ? new RegExp(`(${path})`) : new RegExp(path)
+function _generateReg(path) {
+  return new RegExp(path)
 }
+
 /**
- * 
- * @param {string} url 
+ *
+ * @param {string} url
  */
-function findRoute(url){
-    return routes.find((item)=>{
-        if(item.from.test(url)){
-            return true
-        }
-    })
+function _findRoute(url) {
+  return routes.find(item => item.from.test(url))
 }
+
+function _getRedirectUrl(url, route) {
+  let redirectUrl = route.to
+  let fgroup = url.match(_generateReg(route.from))
+  let isTo = /\(\d+\)/.test(route.to)
+  // TODO: query params处理是否不智能
+  isTo && redirectUrl.replace(/\(\d+\)/g, (match) => fgroup[match] || '')
+  return redirectUrl
+}
+
+// TODO: 下个版本使用stream来转发
+module.exports = async function (url, req, res) {
+  let route = _findRoute(url)
+  if (route) {
+    // 转发路由
+    let redirectUrl = _getRedirectUrl(url, route)
+    let response = await axios.request({
+      url: redirectUrl,
+      method: req.method,
+      headers: Object.assign({}, req.headers, route.headers),
+      transformRequest: [data => data] // 转发data
+
+    }).catch(err => {
+      // TODO: 这里属于系统发送请求失败，应该提示管理员
+      console.error(err)
+      throw err
+    })
+
+    let headers = response.headers
+    for (let header in headers) {
+      res.setHeader(header, headers[header])
+    }
+    res.statusCode = response.status //axios的响应码
+    res.end(response.data)
+    return Promise.reject({ next: false })
+  } else {
+    return { next: 'true' }
+  }
+}
+
+// 处理/redirect.json 转发配置文件
 try {
-    let redirect = fs.readFileSync(path.join(config.root,'./redirect.json'),{encoding:'utf-8'})
-    let reConfig = JSON.parse(redirect)
-    //提取所有的路由，并且将form，to字段转换成正则表达式
-    routes = reConfig.route.map((item)=>{
-        let from = _normalizeText(item.from)
-        //let to = _normalizeText(item.to)
-        return Object.assign({},item,{from})
-    })
-    
-    
+  let redirect = fs.readFileSync(path.join(config.root, './redirect.json'), { encoding: 'utf-8' })
+  let reConfig = JSON.parse(redirect)
+  //提取所有的路由，并且将form，to字段转换成正则表达式
+  routes = reConfig.route
 } catch (error) {
-    console.info('no redirect.json',error)
-}
-
-function _getRedirectUrl(url,route){
-    let redirectUrl = ''
-    let fgroup = url.match(route.from)
-    let pattern = /\((\d)\)/g
-    let t = pattern.exec(route.to)
-    if(t){
-        redirectUrl = route.to
-        while(t){
-            let g = parseInt(t[1])
-            if(fgroup[g]){
-                redirectUrl = redirectUrl.replace(t[0],fgroup[g])
-            }
-            t = pattern.exec(route.to)
-        }
-    }else{
-        //to没有使用，那就将整个to当作url
-        redirectUrl = route.to
-    }
-    return redirectUrl
-}
-
-module.exports =async function(url,req,res){
-    if(!routes){
-        return false
-    }
-    //找到合适的route
-    let route = findRoute(url)
-    if(!route){
-       // console.info('no route redirect')
-        return false
-    }else{
-        //console.info('route redirect')
-        let redirectUrl = _getRedirectUrl(url,route)
-        let response = await axios.request({
-            url:redirectUrl,
-            method:req.method,
-            headers:Object.assign({},req.headers,route.headers)
-        }).catch((err)=>{
-            console.error(err)
-            return true
-        })
-        let headers = response.headers
-        for(let header in headers){
-            res.setHeader(header,headers[header])
-        }
-        res.statusCode = response.status
-        let ret = response.data
-
-        if (route.isJSON && typeof ret === 'string')  {
-            var reg = /^\w+\(({[^()]+})\)$/
-            var matches = ret.match(reg)
-            if (matches) {
-              ret = JSON.parse(matches[1])
-            }
-            ret = JSON.stringify(ret)
-          }
-        if(typeof ret === 'object'){
-            ret = JSON.stringify(ret)
-        }
-        //如果是字符串，就按照jsonp的格式转换成json字符串
-        res.end(ret)
-        return true
-    }
-   
-
-     
-     
+  console.info('no redirect.json', error)
 }
