@@ -1,10 +1,14 @@
 {
-  "name": "anydoor",
+  "name": "anycan",
   "version": "0.1.0",
   "description": "tiny nodejs web server",
   "main": "src/app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/JE-lee/anycan.git"
+  },
   "bin": {
-    "anydoor": "bin/anydoor"
+    "anycan": "src/app.js"
   },
   "scripts": {
     "lint": "eslint .",

@@ -67,7 +67,7 @@ try {
   //提取所有的路由，并且将form，to字段转换成正则表达式
   routes = reConfig.route
 } catch (error) {
-  console.info('no redirect.json', error)
+  //console.info('no redirect.json', error)
 }
 
 const isTest = process.env.MOCHA_ENV

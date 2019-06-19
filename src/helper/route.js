@@ -72,7 +72,7 @@ module.exports = async function (req, res, filepath) {
   } catch (ex) {
     res.statusCode = 404
     res.setHeader('Content-Type', 'text/plain')
-    res.end(`${req.url} not found！+ error ${ex.toString()}`)
+    res.end(`${req.url} not found! + error ${ex.toString()}`)
     return ({ next: true })
   }
 
