@@ -1,36 +1,37 @@
 {
-    "name": "anydoor",
-    "version": "0.1.0",
-    "description": "tiny nodejs web server",
-    "main": "src/app.js",
-    "bin": {
-        "anydoor": "bin/anydoor"
-    },
-    "scripts": {
-        "lint": "eslint .",
-        "fix": "eslint --fix ."
-    },
-    "pre-commit": [
-        "fix",
-        "lint"
-    ],
-    "keywords": [
-        "static",
-        "webserver"
-    ],
-    "author": "Samaritan89",
-    "email": "sunluyong@gmail.com",
-    "license": "MIT",
-    "devDependencies": {
-        "babel-eslint": "^7.2.3",
-        "eslint": "^4.5.0",
-        "mocha": "^6.1.4",
-        "pre-commit": "^1.2.2"
-    },
-    "dependencies": {
-        "axios": "^0.18.0",
-        "chalk": "^2.3.1",
-        "handlebars": "^4.0.11",
-        "yargs": "^11.0.0"
-    }
+  "name": "anydoor",
+  "version": "0.1.0",
+  "description": "tiny nodejs web server",
+  "main": "src/app.js",
+  "bin": {
+    "anydoor": "bin/anydoor"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "fix": "eslint --fix .",
+    "start": "node ./src/app.js"
+  },
+  "pre-commit": [
+    "fix",
+    "lint"
+  ],
+  "keywords": [
+    "static",
+    "webserver"
+  ],
+  "author": "Samaritan89",
+  "email": "sunluyong@gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.5.0",
+    "mocha": "^6.1.4",
+    "pre-commit": "^1.2.2"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "chalk": "^2.3.1",
+    "handlebars": "^4.0.11",
+    "yargs": "^11.0.0"
+  }
 }

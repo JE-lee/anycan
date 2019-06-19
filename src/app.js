@@ -13,11 +13,12 @@ const server = http.createServer((req, res) => {
   redirect(url, req, res).then(() => {
     //req.url会得到除了host和端口后面的路径。
     //如果是根目录，就返回/index.html
+
     if (url === '/') {
       url = '/index.html'
     }
     return route(req, res, path.join(config.root, url))
-  })
+  }).catch(() => {})
 
 })
 
